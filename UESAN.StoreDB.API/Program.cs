@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UESAN.StoreDB.DOMAIN.Core.Interfaces;
+using UESAN.StoreDB.DOMAIN.Core.Services;
 using UESAN.StoreDB.DOMAIN.Infrastructure.Data;
 using UESAN.StoreDB.DOMAIN.Infrastructure.Repositories;
 
@@ -18,6 +19,7 @@ builder.Services
     (options => options.UseSqlServer(cnx));
 
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+builder.Services.AddTransient<ICategoryServices, CategoryServices >();
 
 
 builder.Services.AddControllers();

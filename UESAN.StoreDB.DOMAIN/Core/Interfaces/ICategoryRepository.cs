@@ -9,5 +9,6 @@ namespace UESAN.StoreDB.DOMAIN.Core.Interfaces
         Task<Category> GetCategoryByID(int id);
         Task<int> Insert(Category category);
         Task<bool> Update(Category category);
+        Task<Category> GetCategoryWithProducts(int id);
     }
 }

@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using UESAN.StoreDB.DOMAIN.Core.DTO;
 using UESAN.StoreDB.DOMAIN.Core.Entities;
 using UESAN.StoreDB.DOMAIN.Core.Interfaces;
+using UESAN.StoreDB.DOMAIN.Core.Services;
+using UESAN.StoreDB.DOMAIN.Infrastructure.Repositories;
 
 namespace UESAN.StoreDB.API.Controllers
 {
@@ -10,55 +13,56 @@ namespace UESAN.StoreDB.API.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ICategoryRepository _categoryRepository;
-        public CategoryController(ICategoryRepository categoryRepository)
+        //private readonly ICategoryRepository _categoryRepository;
+        private readonly ICategoryServices _categoryService;
+
+        public CategoryController(ICategoryServices categoryService)
         {
-            _categoryRepository = categoryRepository;
+            //_categoryRepository = categoryRepository;
+            _categoryService = categoryService;
         }
 
         [HttpGet()]
-        public async Task<ActionResult> GetCategories()
+        public async Task<IActionResult> GetCategories()
         {
-            var categories = await _categoryRepository.GetCategories();
+            var categories = await _categoryService.GetCategories();
             return Ok(categories);
         }
 
         [HttpGet("{id}")]
-
-        public async Task<IActionResult> GetCategoryById(int id)
+        public async Task<IActionResult> GetCategoryById(int id, [FromQuery] bool includeProducts)
         {
-            var category = await _categoryRepository.GetCategoryByID(id);
-            if (category == null)  return NotFound();
-            return Ok(category);
-
+            if (includeProducts)
+            {
+                return Ok(await _categoryService.GetCategoryWithProducts(id));
+            } 
+            return Ok(await _categoryService.GetCategoryByID(id));
         }
 
         [HttpPost]
-
-        public async Task<IActionResult> Create(Category category)
+        public async Task<IActionResult> Create([FromBody] CateogryDescriptionDTO categoryDTO)
         {
-            int categoryId = await _categoryRepository.Insert(category);
+            int categoryId = await _categoryService.Insert(categoryDTO);
             return Ok(categoryId);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Category category)
+        public async Task<IActionResult> Update(int id, [FromBody] CategoryDTO categoryDTO)
         {
-            if(id != category.Id) return BadRequest();
-            var result = await _categoryRepository.Update(category);
-            //return Ok($"{id} {result}");
+            if (id != categoryDTO.Id) return BadRequest();
+            var result = await _categoryService.Update(categoryDTO);
             if (!result) return NotFound();
             return Ok(result);
         }
 
         [HttpDelete("{id}")]
-
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _categoryRepository.Delete(id);
+            var result = await _categoryService.Delete(id);
             if (!result) return NotFound();
             return Ok(result);
         }
+
 
 
     }

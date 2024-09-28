@@ -33,9 +33,20 @@ namespace UESAN.StoreDB.DOMAIN.Infrastructure.Repositories
         //    var categorias = _dbContext.Category.ToList();
         //    return categorias;
         //}
+
+        public async Task<Category> GetCategoryWithProducts(int id) 
+        {
+            var category = await _dbContext
+                .Category
+                .Where(c => c.Id == id && c.IsActive == true)
+                .Include(p=>p.Product)
+                .FirstOrDefaultAsync();
+            return category;
+        }
+
         public async Task<IEnumerable<Category>> GetCategories()
         {
-            var categorias = await _dbContext.Category.ToListAsync();
+            var categorias = await _dbContext.Category.Where(c=>c.IsActive==true).ToListAsync();
             return categorias;
         }
 
@@ -60,6 +71,7 @@ namespace UESAN.StoreDB.DOMAIN.Infrastructure.Repositories
 
         public async Task<int> Insert(Category category)
         {
+            category.IsActive = true;
             await _dbContext.Category.AddAsync(category);
             int rows = await _dbContext.SaveChangesAsync();
             return rows > 0 ? category.Id : -1;
@@ -68,20 +80,21 @@ namespace UESAN.StoreDB.DOMAIN.Infrastructure.Repositories
         //Update category
         public async Task<bool> Update(Category category)
         {
+            //is active true
             _dbContext.Category.Update(category);
             int rows = await _dbContext.SaveChangesAsync();
             return rows > 0;
         }
 
         //Delete category
-
+        
         public async Task<bool> Delete(int id)
         {
             var category = _dbContext
                             .Category
                             .FirstOrDefault(c => c.Id == id);
             //_dbContext.Category.Remove(category);
-            if (category != null)
+            if (category == null)
             {
                 return false;
             }
@@ -90,5 +103,6 @@ namespace UESAN.StoreDB.DOMAIN.Infrastructure.Repositories
             int rows = await _dbContext.SaveChangesAsync();
             return rows > 0;
         }
+
     }
 }
